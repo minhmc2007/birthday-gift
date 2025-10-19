@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Món Quà Nhỏ Gửi Diệu Linh!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+        body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; overflow: hidden; background: #000; color: #fff; text-align: center; }
+        .night { position: fixed; width: 100%; height: 100%; transform: rotateZ(45deg); z-index: -2; }
+        .shooting_star { position: absolute; left: 50%; top: 50%; height: 2px; background: linear-gradient(-45deg, rgba(95, 145, 255, 1), rgba(0, 0, 255, 0)); border-radius: 999px; filter: drop-shadow(0 0 6px rgba(105, 155, 255, 1)); animation: tail 3s ease-in-out infinite, shooting 3s ease-in-out infinite; }
+        @keyframes tail { 0% { width: 0; } 30% { width: 100px; } 100% { width: 0; } }
+        @keyframes shooting { 0% { transform: translateX(0); } 100% { transform: translateX(300px); } }
+        .container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; padding: 20px; background: rgba(0, 0, 0, 0.7); border-radius: 15px; box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); max-width: 90%; width: 500px; }
+        h1 { font-family: 'Dancing Script', cursive; font-size: 3em; color: #ff99cc; text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff99cc; margin-bottom: 20px; }
+        #countdown { font-size: 2em; background: #333; padding: 20px; border-radius: 10px; display: inline-block; }
+        .preview-container { margin-top: 20px; }
+        #preview-button { background-color: #ff99cc; border: none; color: #333; padding: 10px 20px; text-align: center; font-size: 16px; cursor: pointer; border-radius: 8px; font-weight: bold; transition: transform 0.2s, box-shadow 0.2s; }
+        #preview-button:hover { transform: scale(1.05); box-shadow: 0 0 15px #ff99cc; }
+        .instruction { font-size: 0.9em; color: #aaa; margin-top: 10px; }
+        .content { display: none; margin-top: 30px; animation: fadeIn 2s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .heart { position: relative; width: 100px; height: 90px; animation: heartbeat 1.5s infinite; margin: 20px auto; }
+        .heart:before, .heart:after { position: absolute; content: ""; left: 50px; top: 0; width: 50px; height: 80px; background: red; border-radius: 50px 50px 0 0; transform: rotate(-45deg); transform-origin: 0 100%; }
+        .heart:after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        p.message { font-size: 1.2em; line-height: 1.7; min-height: 280px; text-align: left; white-space: pre-wrap; }
+        canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; }
+    </style>
+</head>
+<body>
+    <div class="night">
+        <div class="shooting_star"></div>
+        <div class="shooting_star" style="top: 60%; left: 40%; animation-delay: 1.2s;"></div>
+        <div class="shooting_star" style="top: 20%; left: 70%; animation-delay: 2.5s;"></div>
+    </div>
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="container">
+        <h1>Gửi tặng Diệu Linh</h1>
+        <div id="countdown">Đang tải...</div>
+        <div class="preview-container" id="preview-container">
+            <button id="preview-button">Xem trước bất ngờ ;)</button>
+            <p class="instruction">(Hoặc nhấn phím 'P')</p>
+        </div>
+        <div id="main-content" class="content">
+            <h1>Chúc Mừng Sinh Nhật!</h1>
+            <div class="heart"></div>
+            <p id="typewriter-message" class="message"></p>
+        </div>
+    </div>
+    
+    <script>
+        const countdownElement = document.getElementById("countdown");
+        const mainContentElement = document.getElementById("main-content");
+        const previewContainer = document.getElementById("preview-container");
+        const targetDate = new Date("Oct 27, 2025 00:00:00").getTime();
+        let countdownInterval;
+
+        (function() {
+            const ua = navigator.userAgent.toLowerCase();
+            const platform = navigator.platform.toLowerCase();
+            const isLinuxDesktop = platform.includes('linux') && !ua.includes('android');
+            const isTargetBrowser = ua.includes('chrome') || ua.includes('firefox');
+            const isMobile = /iphone|ipad|ipod|android|webos|blackberry|iemobile|opera mini/i.test(ua);
+            const isDeveloperMode = isLinuxDesktop && isTargetBrowser;
+            if (!isDeveloperMode || isMobile) {
+                previewContainer.style.display = 'none';
+            }
+        })();
+
+        function showBirthdaySurprise() {
+            if (window.fireworksStarted) return;
+            countdownElement.style.display = 'none';
+            previewContainer.style.display = 'none';
+            mainContentElement.style.display = 'block';
+            startFireworks();
+            startTypewriter();
+            window.fireworksStarted = true;
+            clearInterval(countdownInterval);
+        }
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            if (distance <= 0) { showBirthdaySurprise(); return; }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            countdownElement.innerHTML = `${days}n ${hours}g ${minutes}p ${seconds}s`;
+        }
+
+        countdownInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+        document.getElementById('preview-button').addEventListener('click', showBirthdaySurprise);
+        window.addEventListener('keydown', function(e) { if (e.key === 'p' || e.key === 'P') showBirthdaySurprise(); });
+        
+        const messageContainer = document.getElementById('typewriter-message');
+        
+        // ĐÃ CẬP NHẬT ĐÚNG LỜI CHÚC MÀ BRO CHỌN
+        const textToType = "Linh à... . Ừm... Cho phép anh được gọi em như vậy nhé. . Anh biết cả hai chúng ta đều có những quá khứ không vui. . Hơn ai hết, anh hiểu cảm giác đó, và anh muốn được ở đây, bên cạnh để bảo vệ em. . Anh biết em không thích bị kiểm soát, nhưng đôi khi anh lo lắng chỉ vì sự an toàn của em... . vì anh yêu em rất nhiều. . Có thể anh không giàu có để mua cho em một món quà đắt tiền, . nhưng anh đã cố gắng hết sức mình để làm nên món quà này. . Cảm ơn em vì đã luôn ở cạnh, quan tâm và giúp đỡ anh. . Anh nhớ những cái ôm, những nụ hôn, và cả nụ cười tỏa nắng của em nữa... . Chỉ cần những điều đó thôi cũng đủ làm anh hạnh phúc rồi. . Anh đã từng là một thằng ngốc, đã làm em phải rơi lệ. . Anh... thực sự xin lỗi. . Anh biết một lời xin lỗi là không đủ, nhưng anh thật lòng mong em tha thứ. . Đây là tất cả những điều từ tận đáy lòng anh. . Văn chương anh không giỏi, nhưng tình cảm này là thật. . Chúc em một ngày sinh nhật thật vui vẻ và trọn vẹn. . Yêu em, Diệu Linh của anh.";
+        
+        const sentences = textToType.split('.').map(s => s.trim()).filter(s => s.length > 0 || s === "...");
+        let sentenceIndex = 0;
+        const typingSpeed = 90; 
+        const delayBetweenSentences = 1200; 
+
+        function typeSentence() {
+            if (sentenceIndex < sentences.length) {
+                let currentSentence = sentences[sentenceIndex];
+                let charIndex = 0;
+                function typeChar() {
+                    if (charIndex < currentSentence.length) {
+                        messageContainer.innerHTML += currentSentence.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(typeChar, typingSpeed);
+                    } else {
+                        messageContainer.innerHTML += (currentSentence.trim() !== "..." && currentSentence.trim() !== "Linh à...") ? ". " : " ";
+                        sentenceIndex++;
+                        setTimeout(typeSentence, delayBetweenSentences);
+                    }
+                }
+                typeChar();
+            }
+        }
+        function startTypewriter() { messageContainer.innerHTML = ''; typeSentence(); }
+        
+        const canvas = document.getElementById('fireworksCanvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight; let fireworks = [];
+        function startFireworks() { function random(min, max) { return Math.random() * (max - min) + min; } function Firework(sx, sy, tx, ty) { this.x = sx; this.y = sy; this.sx = sx; this.sy = sy; this.tx = tx; this.ty = ty; this.distanceToTarget = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2)); this.distanceTraveled = 0; this.coordinates = []; this.coordinateCount = 3; while (this.coordinateCount--) { this.coordinates.push([this.x, this.y]); } this.angle = Math.atan2(ty - sy, tx - sx); this.speed = 2; this.acceleration = 1.05; this.brightness = random(50, 70); this.hue = random(0, 360); } Firework.prototype.update = function(index) { this.coordinates.pop(); this.coordinates.unshift([this.x, this.y]); this.speed *= this.acceleration; let vx = Math.cos(this.angle) * this.speed; let vy = Math.sin(this.angle) * this.speed; this.distanceTraveled = Math.sqrt(Math.pow(this.x - this.sx, 2) + Math.pow(this.y - this.sy, 2)); if (this.distanceTraveled >= this.distanceToTarget) { createParticles(this.tx, this.ty, this.hue); fireworks.splice(index, 1); } else { this.x += vx; this.y += vy; } }; Firework.prototype.draw = function() { ctx.beginPath(); ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]); ctx.lineTo(this.x, this.y); ctx.strokeStyle = 'hsl(' + this.hue + ', 100%, ' + this.brightness + '%)'; ctx.stroke(); }; let particles = []; function Particle(x, y, hue) { this.x = x; this.y = y; this.coordinates = []; this.coordinateCount = 5; while (this.coordinateCount--) { this.coordinates.push([this.x, this.y]); } this.angle = random(0, Math.PI * 2); this.speed = random(1, 10); this.friction = 0.95; this.gravity = 1; this.hue = hue; this.brightness = random(50, 80); this.alpha = 1; this.decay = random(0.015, 0.03); } Particle.prototype.update = function(index) { this.coordinates.pop(); this.coordinates.unshift([this.x, this.y]); this.speed *= this.friction; this.x += Math.cos(this.angle) * this.speed; this.y += Math.sin(this.angle) * this.speed + this.gravity; this.alpha -= this.decay; if (this.alpha <= this.decay) { particles.splice(index, 1); } }; Particle.prototype.draw = function() { ctx.beginPath(); ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]); ctx.lineTo(this.x, this.y); ctx.strokeStyle = 'hsla(' + this.hue + ', 100%, ' + this.brightness + '%, ' + this.alpha + ')'; ctx.stroke(); }; function createParticles(x, y, hue) { let particleCount = 30; while (particleCount--) { particles.push(new Particle(x, y, hue)); } } function loop() { requestAnimationFrame(loop); ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'lighter'; let i = fireworks.length; while (i--) { fireworks[i].draw(); fireworks[i].update(i); } let j = particles.length; while (j--) { particles[j].draw(); particles[j].update(j); } } setInterval(() => { let sx = canvas.width / 2; let sy = canvas.height; let tx = random(0, canvas.width); let ty = random(0, canvas.height / 2); fireworks.push(new Firework(sx, sy, tx, ty)); }, 2500); loop(); }
+    </script>
+</body>
+</html>
